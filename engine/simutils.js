@@ -20,6 +20,13 @@ var SimUtils = function() {
   //Private Values
 
   //Default Values
+
+  //Driver Values
+  const DEFAULT_AVG = 16,
+        MIN_AVG = 0,
+        MAX_AVG = 20;
+
+  //Track Values
   const DEFAULT_AVERAGE_SPEED = 190,
         DEFAULT_SECTOR_LENGTH = 1800,
         DEFAULT_SECTOR_TYPE = this.NORMAL,
@@ -31,20 +38,98 @@ var SimUtils = function() {
   //Public Methods
   this.getRaceParams = function(query) {
     var params = {};
-    //Track Params
-    var sectors_length = getSectorLength(query);
-    var sectors_type = getSectorType(query, sectors_length.length);
-    params.average_speed = getAverageSpeed(query);
-    params.sectors = getSectors(sectors_length, sectors_type);
-    params.laps = getLaps(query);
+
+    if (!query.driver_id)
+      return params;
+
     //Drivers Params
+    params.drivers = getDriversParams(query);
+
+    //Track Params
+    params.track = getTrackParams(query);
 
     return params;
   };
 
   //Private Methods
+
+  //Driver Methods
+  var getDriversIds = function(query) {
+    if (!(query.driver_id instanceof Array))
+      return [query.driver_id];
+    else
+      return query.driver_id.filter(function(id, index, self) {
+          return index == self.indexOf(id);
+      })
+  }
+  var getDriversAvgs = function(query, drivers_number) {
+    var drivers_avgs = [];
+    for (var i=0; i<drivers_number; i++) {
+      var driver_avg = (!(query.driver_avg instanceof Array)) ?
+                       query.driver_avg :
+                       query.driver_avg[i];
+      driver_avg = parseInt(driver_avg);
+      drivers_avgs.push(
+        !isNaN(driver_avg) && driver_avg >= MIN_AVG && driver_avg <= MAX_AVG ?
+        driver_avg :
+        DEFAULT_AVG
+      );
+    }
+    return drivers_avgs;
+  };
+  var getTeamsAvgs = function(query, drivers_number) {
+    var teams_avgs = [];
+    for (var i=0; i<drivers_number; i++) {
+      var team_avg = (!(query.team_avg instanceof Array)) ?
+                       query.team_avg :
+                       query.team_avg[i];
+      team_avg = parseInt(team_avg);
+      teams_avgs.push(
+        !isNaN(team_avg) && team_avg >= MIN_AVG && team_avg <= MAX_AVG ?
+        team_avg :
+        DEFAULT_AVG
+      );
+    }
+    return teams_avgs;
+  };
+  var getEnginesAvgs = function(query, drivers_number) {
+    var engines_avgs = [];
+    for (var i=0; i<drivers_number; i++) {
+      var engine_avg = (!(query.engine_avg instanceof Array)) ?
+                       query.engine_avg :
+                       query.engine_avg[i];
+      engine_avg = parseInt(engine_avg);
+      engines_avgs.push(
+        !isNaN(engine_avg) && engine_avg >= MIN_AVG && engine_avg <= MAX_AVG ?
+        engine_avg :
+        DEFAULT_AVG
+      );
+    }
+    return engines_avgs;
+  };
+  var getDrivers = function(drivers_ids, drivers_avgs,
+                            teams_avgs, engines_avgs) {
+    var drivers = [];
+    drivers_ids.forEach(function(id, index) {
+      var driver = {};
+      driver.id = id;
+      driver.avg = drivers_avgs[index];
+      driver.team_avg = teams_avgs[index];
+      driver.engine_avg = engines_avgs[index];
+      drivers.push(driver);
+    });
+    return drivers;
+  }
+  var getDriversParams = function(query) {
+    var drivers_ids = getDriversIds(query);
+    var drivers_avgs = getDriversAvgs(query, drivers_ids.length);
+    var teams_avgs = getTeamsAvgs(query, drivers_ids.length);
+    var engines_avgs = getEnginesAvgs(query, drivers_ids.length);
+    return getDrivers(drivers_ids, drivers_avgs, teams_avgs, engines_avgs);
+  }
+
   //Track Methods
-  var getSectorLength = function(query) {
+  var getSectorsLengths = function(query) {
     if (!query.sector_length || !(query.sector_length instanceof Array))
       return [(query.sector_length && !isNaN(parseInt(query.sector_length))) ?
               parseInt(query.sector_length) :
@@ -57,20 +142,19 @@ var SimUtils = function() {
                DEFAULT_SECTOR_LENGTH;
       });
   };
-  var getSectorType = function(query, sectors_number) {
-    var sector_type = [];
+  var getSectorsTypes = function(query, sectors_number) {
+    var sectors_types = [];
     for (var i=0; i<sectors_number; i++) {
       var type = (!(query.sector_type instanceof Array)) ?
                  query.sector_type :
                  query.sector_type[i];
-      console.log(SECTOR_TYPES_ARRAY);
-      sector_type.push(
+      sectors_types.push(
         type && SECTOR_TYPES_ARRAY.indexOf(type) > -1 ?
         type :
         DEFAULT_SECTOR_TYPE
       );
     }
-    return sector_type;
+    return sectors_types;
   };
   var getSectors = function (sectors_length, sectors_type) {
     var sectors = [];
@@ -88,7 +172,16 @@ var SimUtils = function() {
   var getLaps = function(query) {
     return query.laps || DEFAULT_LAPS;
   };
-  //Driver Methods
+  var getTrackParams = function(query) {
+    var params = {};
+    var sectors_lengths = getSectorsLengths(query);
+    var sectors_types = getSectorsTypes(query, sectors_lengths.length);
+    params.average_speed = getAverageSpeed(query);
+    params.sectors = getSectors(sectors_lengths, sectors_types);
+    params.laps = getLaps(query);
+    return params;
+  }
+
 };
 
 module.exports = new SimUtils();
