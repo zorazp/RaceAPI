@@ -35,6 +35,7 @@ var SimUtils = function() {
     params.average_speed = getAverageSpeed(query);
     params.sector_length = getSectorLength(query);
     params.sector_type = getSectorType(query, params.sector_length.length);
+    params.laps = getLaps(query);
     //Drivers Params
 
     return params;
@@ -71,6 +72,9 @@ var SimUtils = function() {
       );
     }
     return sector_type;
+  }
+  var getLaps = function(query) {
+    return query.laps || DEFAULT_LAPS;
   }
 
 };
