@@ -32,9 +32,10 @@ var SimUtils = function() {
   this.getRaceParams = function(query) {
     var params = {};
     //Track Params
+    var sectors_length = getSectorLength(query);
+    var sectors_type = getSectorType(query, sectors_length.length);
     params.average_speed = getAverageSpeed(query);
-    params.sector_length = getSectorLength(query);
-    params.sector_type = getSectorType(query, params.sector_length.length);
+    params.sectors = getSectors(sectors_length, sectors_type);
     params.laps = getLaps(query);
     //Drivers Params
 
@@ -42,9 +43,7 @@ var SimUtils = function() {
   };
 
   //Private Methods
-  var getAverageSpeed = function(query) {
-    return query.average_speed || DEFAULT_AVERAGE_SPEED;
-  };
+  //Track Methods
   var getSectorLength = function(query) {
     if (!query.sector_length || !(query.sector_length instanceof Array))
       return [(query.sector_length && !isNaN(parseInt(query.sector_length))) ?
@@ -57,7 +56,7 @@ var SimUtils = function() {
                parseInt(length) :
                DEFAULT_SECTOR_LENGTH;
       });
-  }
+  };
   var getSectorType = function(query, sectors_number) {
     var sector_type = [];
     for (var i=0; i<sectors_number; i++) {
@@ -72,11 +71,24 @@ var SimUtils = function() {
       );
     }
     return sector_type;
-  }
+  };
+  var getSectors = function (sectors_length, sectors_type) {
+    var sectors = [];
+    sectors_length.forEach(function(sector_length, index) {
+      var sector = {};
+      sector.length = sector_length;
+      sector.type = sectors_type[index];
+      sectors.push(sector);
+    });
+    return sectors;
+  };
+  var getAverageSpeed = function(query) {
+    return query.average_speed || DEFAULT_AVERAGE_SPEED;
+  };
   var getLaps = function(query) {
     return query.laps || DEFAULT_LAPS;
-  }
-
+  };
+  //Driver Methods
 };
 
 module.exports = new SimUtils();
