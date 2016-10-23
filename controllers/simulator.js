@@ -7,4 +7,3 @@ exports.simulateRace = function(req, res) {
       return res.status(500).send("Driver Id unassigned.");
   res.status(200).jsonp(params);
 };
-
