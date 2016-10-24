@@ -24,56 +24,64 @@ var Simulator = function() {
   var getLapTimes = function(lap, params) {
     var lap_times = {};
     params.drivers.forEach(function(driver) {
-      lap_times[driver.id] = getDriverTime(driver, params);
+      lap_times[driver.id] = getDriverTime(driver, params.track);
     });
     return lap_times;
   };
-  var getDriverTime = function(driver, params) {
+  var getDriverTime = function(driver, track) {
     var driver_time = {};
     driver_time.sectors = [];
-    params.track.sectors.forEach(function(sector, index) {
-      driver_time.sectors.push(getSectorTime(driver, sector, params));
+    track.sectors.forEach(function(sector, index) {
+      driver_time.sectors.push(getSectorTime(driver, sector, track));
     });
     return driver_time;
   }
-  var getSectorTime = function(driver, sector, params) {
-    var sector_data = {};
-    var raw_time = sector.length/(params.track.average_speed*1000/3600);
-    var sector_type_time = getSectorTypeTime(raw_time, sector);
-    sector_data.time = sector_type_time;
-    return sector_data;
+  var getSectorTime = function(driver, sector, track) {
+    var raw_time = sector.length/(track.average_speed*1000/3600);
+    var sector_type_coef = getSectorTypeCoef(sector);
+    var driver_avg_coef = getDriverAvgCoef(driver, track);
+    var team_avg_coef = getTeamAvgCoef(driver, track);
+    var engine_avg_coef = getEngineAvgCoef(driver);
+    return raw_time*sector_type_coef*driver_avg_coef*
+      team_avg_coef*engine_avg_coef;
   }
-  var getSectorTypeTime = function(raw_time, sector) {
-    var sector_type_time;
-    var sector_coef;
+  var getSectorTypeCoef = function(sector) {
     if (sector.type == SimUtils.VERY_SLOW)
-      sector_coef = SimUtils.getRandomInt(
+      return SimUtils.getRandomInt(
         SimUtils.VERY_SLOW_RANGE[0], SimUtils.VERY_SLOW_RANGE[1]
       );
     else if (sector.type == SimUtils.SLOW)
-      sector_coef = SimUtils.getRandomInt(
+      return SimUtils.getRandomInt(
         SimUtils.SLOW_RANGE[0], SimUtils.SLOW_RANGE[1]
       );
     else if (sector.type == SimUtils.FAST)
-      sector_coef = SimUtils.getRandomInt(
+      return SimUtils.getRandomInt(
         SimUtils.FAST_RANGE[0], SimUtils.FAST_RANGE[1]
       );
     else if (sector.type == SimUtils.VERY_FAST)
-      sector_coef = SimUtils.getRandomInt(
+      return SimUtils.getRandomInt(
         SimUtils.VERY_FAST_RANGE[0], SimUtils.VERY_FAST_RANGE[1]
       );
     else
-      sector_coef = SimUtils.getRandomInt(
+      return SimUtils.getRandomInt(
         SimUtils.NORMAL_RANGE[0], SimUtils.NORMAL_RANGE[1]
       );
-    sector_type_time = raw_time*sector_coef;
-    return sector_type_time;
   };
-  var getDriverAvgTime = function(raw_time, driver) {
-    return null;
+  var getDriverAvgCoef = function(driver, track) {
+    var driver_avg = driver.country == track.country ? 
+                     driver.avg+2 :
+                     driver.avg;
+    return (98-SimUtils.getRandomInt(driver_avg-10, driver_avg+10)/10)/100;
   }
-  var getTeamAvgTime = function(raw_time, driver) {
-    return null;
+  var getTeamAvgCoef = function(driver, track) {
+    var team_avg = driver.team_country == track.country ? 
+                   driver.team_avg+1 :
+                   driver.team_avg;
+    return (98-SimUtils.getRandomInt(team_avg-12, team_avg+12)/10)/100;
+  }
+  var getEngineAvgCoef = function(driver) {
+    var engine_avg = driver.engine_avg;
+    return (98-SimUtils.getRandomInt(engine_avg-15, engine_avg+15)/10)/100;
   }
 
 };

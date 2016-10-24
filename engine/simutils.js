@@ -201,6 +201,9 @@ var SimUtils = function() {
   var getLaps = function(query) {
     return query.laps || DEFAULT_LAPS;
   };
+  var getTrackCountry = function(query) {
+  	return query.track_country || DEFAULT_COUNTRY;
+  }
   var getTrackParams = function(query) {
     var params = {};
     var sectors_lengths = getSectorsLengths(query);
@@ -208,6 +211,7 @@ var SimUtils = function() {
     params.average_speed = getAverageSpeed(query);
     params.sectors = getSectors(sectors_lengths, sectors_types);
     params.laps = getLaps(query);
+    params.country = getTrackCountry(query);
     return params;
   };
 
