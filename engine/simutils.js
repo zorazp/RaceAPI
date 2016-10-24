@@ -24,7 +24,8 @@ var SimUtils = function() {
   //Driver Values
   const DEFAULT_AVG = 16,
         MIN_AVG = 0,
-        MAX_AVG = 20;
+        MAX_AVG = 20,
+        DEFAULT_COUNTRY = "gb";
 
   //Track Values
   const DEFAULT_AVERAGE_SPEED = 190,
@@ -80,6 +81,16 @@ var SimUtils = function() {
     }
     return drivers_avgs;
   };
+  var getDriversCountries = function(query, drivers_number) {
+    var drivers_countries = [];
+    for (var i=0; i<drivers_number; i++) {
+      var driver_country = (!(query.driver_country instanceof Array)) ?
+                           query.driver_country :
+                           query.driver_country[i];
+      drivers_countries.push(driver_country ? driver_country : DEFAULT_COUNTRY);
+    }
+    return drivers_countries;
+  };
   var getTeamsAvgs = function(query, drivers_number) {
     var teams_avgs = [];
     for (var i=0; i<drivers_number; i++) {
@@ -94,6 +105,16 @@ var SimUtils = function() {
       );
     }
     return teams_avgs;
+  };
+  var getTeamsCountries = function(query, drivers_number) {
+    var teams_countries = [];
+    for (var i=0; i<drivers_number; i++) {
+      var team_country = (!(query.team_country instanceof Array)) ?
+                           query.team_country :
+                           query.team_country[i];
+      teams_countries.push(team_country ? team_country : DEFAULT_COUNTRY);
+    }
+    return teams_countries;
   };
   var getEnginesAvgs = function(query, drivers_number) {
     var engines_avgs = [];
@@ -110,14 +131,16 @@ var SimUtils = function() {
     }
     return engines_avgs;
   };
-  var getDrivers = function(drivers_ids, drivers_avgs,
-                            teams_avgs, engines_avgs) {
+  var getDrivers = function(drivers_ids, drivers_avgs, drivers_countries, 
+    				        teams_avgs, teams_countries, engines_avgs) {
     var drivers = [];
     drivers_ids.forEach(function(id, index) {
       var driver = {};
       driver.id = id;
       driver.avg = drivers_avgs[index];
+      driver.country = drivers_countries[index];
       driver.team_avg = teams_avgs[index];
+      driver.team_country = teams_countries[index];
       driver.engine_avg = engines_avgs[index];
       drivers.push(driver);
     });
@@ -126,9 +149,12 @@ var SimUtils = function() {
   var getDriversParams = function(query) {
     var drivers_ids = getDriversIds(query);
     var drivers_avgs = getDriversAvgs(query, drivers_ids.length);
+    var drivers_countries = getDriversCountries(query, drivers_ids.length);
     var teams_avgs = getTeamsAvgs(query, drivers_ids.length);
+    var teams_countries = getTeamsCountries(query, drivers_ids.length);
     var engines_avgs = getEnginesAvgs(query, drivers_ids.length);
-    return getDrivers(drivers_ids, drivers_avgs, teams_avgs, engines_avgs);
+    return getDrivers(drivers_ids, drivers_avgs, drivers_countries, 
+    				  teams_avgs, teams_countries, engines_avgs);
   };
 
   //Track Methods
