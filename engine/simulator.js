@@ -31,8 +31,11 @@ var Simulator = function() {
   var getDriverTime = function(driver, track) {
     var driver_time = {};
     driver_time.sectors = [];
+    driver_time.time = 0;
     track.sectors.forEach(function(sector, index) {
-      driver_time.sectors.push(getSectorTime(driver, sector, track));
+      var sector_time = getSectorTime(driver, sector, track);
+      driver_time.sectors.push(sector_time);
+      driver_time.time += sector_time;
     });
     return driver_time;
   }
@@ -49,23 +52,23 @@ var Simulator = function() {
     if (sector.type == SimUtils.VERY_SLOW)
       return SimUtils.getRandomInt(
         SimUtils.VERY_SLOW_RANGE[0], SimUtils.VERY_SLOW_RANGE[1]
-      );
+      )/100;
     else if (sector.type == SimUtils.SLOW)
       return SimUtils.getRandomInt(
         SimUtils.SLOW_RANGE[0], SimUtils.SLOW_RANGE[1]
-      );
+      )/100;
     else if (sector.type == SimUtils.FAST)
       return SimUtils.getRandomInt(
         SimUtils.FAST_RANGE[0], SimUtils.FAST_RANGE[1]
-      );
+      )/100;
     else if (sector.type == SimUtils.VERY_FAST)
       return SimUtils.getRandomInt(
         SimUtils.VERY_FAST_RANGE[0], SimUtils.VERY_FAST_RANGE[1]
-      );
+      )/100;
     else
       return SimUtils.getRandomInt(
         SimUtils.NORMAL_RANGE[0], SimUtils.NORMAL_RANGE[1]
-      );
+      )/100;
   };
   var getDriverAvgCoef = function(driver, track) {
     var driver_avg = driver.country == track.country ? 
