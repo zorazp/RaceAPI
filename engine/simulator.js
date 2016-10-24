@@ -69,7 +69,13 @@ var Simulator = function() {
     sector_type_time = raw_time*sector_coef;
     return sector_type_time;
   };
-  
+  var getDriverAvgTime = function(raw_time, driver) {
+    return null;
+  }
+  var getTeamAvgTime = function(raw_time, driver) {
+    return null;
+  }
+
 };
 
 module.exports = new Simulator();
