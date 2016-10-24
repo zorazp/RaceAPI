@@ -17,14 +17,17 @@ var Simulator = function() {
     var results = {};
     results.lap_times = {};
     for (var i=0; i<params.track.laps; i++) {
-      results.lap_times[i] = getLapTimes(i, params);
+      results.lap_times[i] = getLapTimes(i, params.drivers, params.track);
     }
+    results.race_times = getRaceTimes(results.lap_times, params.drivers);
     return results;
   };
-  var getLapTimes = function(lap, params) {
+
+  //Laps And Sector Times
+  var getLapTimes = function(lap, drivers, track) {
     var lap_times = {};
-    params.drivers.forEach(function(driver) {
-      lap_times[driver.id] = getDriverTime(driver, params.track);
+    drivers.forEach(function(driver) {
+      lap_times[driver.id] = getDriverTime(driver, track);
     });
     return lap_times;
   };
@@ -85,6 +88,22 @@ var Simulator = function() {
   var getEngineAvgCoef = function(driver) {
     var engine_avg = driver.engine_avg;
     return (98-SimUtils.getRandomInt(engine_avg-15, engine_avg+15)/10)/100;
+  }
+
+  //Race Times
+  var getRaceTimes = function(lap_times, drivers) {
+    var race_times = {};
+    drivers.forEach(function(driver) {
+      race_times[driver.id] = getDriverRaceTime(lap_times, driver);
+    });
+    return race_times;
+  }
+  var getDriverRaceTime = function(lap_times, driver) {
+    var race_time = 0;
+    Object.keys(lap_times).forEach(function(lap) {
+      race_time += lap_times[lap][driver.id]["time"];
+    });
+    return race_time;
   }
 
 };
