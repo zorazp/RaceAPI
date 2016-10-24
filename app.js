@@ -28,6 +28,6 @@ simulator.route('/simulator')
 app.use('/api', simulator);
 
 // Start server
-app.listen(3000, function() {
-  console.log("Node server running on http://localhost:3000");
+app.listen(5000, function() {
+  console.log("Node server running on http://localhost:5000");
 });

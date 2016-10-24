@@ -20,6 +20,7 @@ var Simulator = function() {
       results.lap_times[i] = getLapTimes(i, params.drivers, params.track);
     }
     results.race_times = getRaceTimes(results.lap_times, params.drivers);
+    results.fastest_laps = getFastestLaps(results.lap_times, params.drivers);
     return results;
   };
 
@@ -104,6 +105,27 @@ var Simulator = function() {
       race_time += lap_times[lap][driver.id]["time"];
     });
     return race_time;
+  }
+
+  //Fastest Laps
+  var getFastestLaps = function(lap_times, drivers) {
+    var fastest_laps = {};
+    drivers.forEach(function(driver) {
+      fastest_laps[driver.id] = getDriverFastestLap(lap_times, driver);
+    });
+    return fastest_laps;
+  }
+  var getDriverFastestLap = function(lap_times, driver) {
+    var fastest_lap;
+    Object.keys(lap_times).forEach(function(lap) {
+      var lap_time = lap_times[lap][driver.id]["time"];
+      fastest_lap = lap == 0 ? 
+                    lap_time :
+                    (lap_time < fastest_lap ? 
+                     lap_time : 
+                     fastest_lap);
+    });
+    return fastest_lap;
   }
 
 };
