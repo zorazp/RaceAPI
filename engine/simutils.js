@@ -61,7 +61,7 @@ var SimUtils = function() {
       return query.driver_id.filter(function(id, index, self) {
           return index == self.indexOf(id);
       })
-  }
+  };
   var getDriversAvgs = function(query, drivers_number) {
     var drivers_avgs = [];
     for (var i=0; i<drivers_number; i++) {
@@ -119,14 +119,14 @@ var SimUtils = function() {
       drivers.push(driver);
     });
     return drivers;
-  }
+  };
   var getDriversParams = function(query) {
     var drivers_ids = getDriversIds(query);
     var drivers_avgs = getDriversAvgs(query, drivers_ids.length);
     var teams_avgs = getTeamsAvgs(query, drivers_ids.length);
     var engines_avgs = getEnginesAvgs(query, drivers_ids.length);
     return getDrivers(drivers_ids, drivers_avgs, teams_avgs, engines_avgs);
-  }
+  };
 
   //Track Methods
   var getSectorsLengths = function(query) {
@@ -180,7 +180,7 @@ var SimUtils = function() {
     params.sectors = getSectors(sectors_lengths, sectors_types);
     params.laps = getLaps(query);
     return params;
-  }
+  };
 
 };
 
