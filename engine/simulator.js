@@ -29,7 +29,7 @@ var Simulator = function() {
     var lap_results = {};
     lap_results.sectors = {};
     track.sectors.forEach(function(sector, i) {
-      lap_results.sectors[i] = getSectorResults(drivers, sector, track);
+      lap_results.sectors[i+1] = getSectorResults(drivers, sector, track);
     });
     lap_results.lap_amount = getLapAmount(lap_results.sectors, drivers);
     return lap_results;
