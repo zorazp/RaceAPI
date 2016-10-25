@@ -19,7 +19,7 @@ var SimUtils = function() {
 
   //Start Grid Diference
   this.GRID_DIFFERENCE = 0.3;
-  this.GRID_START_TIME = 2;
+  this.GRID_START_TIME = 5;
 
   //Private Values
 
@@ -193,7 +193,6 @@ var SimUtils = function() {
     var sectors = [];
     sectors_length.forEach(function(sector_length, index) {
       var sector = {};
-      sector.number = index+1;
       sector.length = sector_length;
       sector.type = sectors_type[index];
       sectors.push(sector);

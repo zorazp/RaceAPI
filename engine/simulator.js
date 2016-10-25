@@ -8,45 +8,55 @@ var Simulator = function() {
     var race_results = {};
     race_results.drivers = params.drivers;
     race_results.track = params.track;
-    race_results.results = getResults(params);
+    race_results.race = getRace(params);
     return race_results;
   };
 
   //Private Methods
-  var getResults = function(params) {
-    var results = {};
-    results.lap_times = {};
-    for (var i=0; i<params.track.laps; i++) {
-      results.lap_times[i] = getLapTimes(i, params.drivers, params.track);
-    }
-    results.race_times = getRaceTimes(results.lap_times, params.drivers);
-    results.fastest_laps = getFastestLaps(results.lap_times, params.drivers);
-    return results;
-  };
 
-  //Laps And Sector Times
-  var getLapTimes = function(lap, drivers, track) {
-    var lap_results = {};
-    lap_results.sectors = {};
-    track.sectors.forEach(function(sector) {
-      lap_results.sectors[sector.number] = getSectorResults(
-        lap, drivers, sector, track
-      );
-    });
-    lap_results.lap_amount = getLapAmount(lap_results.sectors, drivers);
-    return lap_results;
+  //Race
+  var getRace = function(params) {
+    var race = {};
+    race.history = getHistory(params);
+    race.race_times = getRaceTimes(race.history, params);
+    race.fastest_laps = getFastestLaps(race.history, params);
+    return race;
   };
-  var getSectorResults = function(lap, drivers, sector, track) {
+  //Race->History
+  var getHistory = function(params) {
+      var history = [];
+      for (var lap=0; lap<params.track.laps; lap++) {
+        history.push(getLapHistory(lap, params));
+      }
+      return history;
+  };
+  var getLapHistory = function(lap, params) {
+    var lap_history = {};
+    lap_history.sectors = getSectorsHistory(lap, params);
+    lap_history.lap = getLapTimes(lap_history.sectors, params);
+    return lap_history;
+  };
+  var getSectorsHistory = function(lap, params) {
+    var sectors_history = [];
+    for (var number=0; number<params.track.sectors.length; number++) {
+      sectors_history.push(getSectorTimes(lap, number, params));
+    }
+    return sectors_history;
+  };
+  var getSectorTimes = function(lap, sector_number, params) {
     var sector_times = {};
-    drivers.forEach(function(driver, grid) {
-      sector_times[driver.id] = getSectorTime(lap, grid, driver, sector, track);
+    params.drivers.forEach(function(driver, grid) {
+      sector_times[driver.id] = getSectorTime(lap, sector_number, grid, params);
     });
     return sector_times;
   };
-  var getSectorTime = function(lap, grid, driver, sector, track) {
+  var getSectorTime = function(lap, sector_number, grid, params) {
+    var track = params.track;
+    var sector = track.sectors[sector_number];
+    var driver = params.drivers[grid];
     var raw_time = sector.length/(track.average_speed*1000/3600);
     //Grid Start Penalization Time
-    raw_time = lap == 0 && sector.number == 1 ? 
+    raw_time = lap == 0 && sector_number == 0 ? 
                raw_time + getGridTime(grid) :
                raw_time;
     var sector_type_coef = getSectorTypeCoef(sector);
@@ -97,49 +107,49 @@ var Simulator = function() {
     var engine_avg = driver.engine_avg;
     return (98-SimUtils.getRandomInt(engine_avg-15, engine_avg+15)/10)/100;
   }
-  var getLapAmount = function(sectors_results, drivers) {
-    var lap_amount = {};
-    drivers.forEach(function(driver) {
-      lap_amount[driver.id] = getDriverLapAmount(sectors_results, driver);
+  var getLapTimes = function(sectors_history, params) {
+    var lap_times = {};
+    params.drivers.forEach(function(driver) {
+      lap_times[driver.id] = getLapTime(sectors_history, driver.id);
     });
-    return lap_amount;
+    return lap_times;
   }
-  var getDriverLapAmount = function(sectors_results, driver) {
-    var lap_amount = 0;
-    Object.keys(sectors_results).forEach(function(sector) {
-      lap_amount += sectors_results[sector][driver.id];
+  var getLapTime = function(sectors_history, driver_id) {
+    var lap_time = 0;
+    sectors_history.forEach(function(sector_history) {
+      lap_time += sector_history[driver_id];
     });
-    return lap_amount;
+    return lap_time;
   }
 
-  //Race Times
-  var getRaceTimes = function(lap_times, drivers) {
+  //Race->Race_Times
+  var getRaceTimes = function(history, params) {
     var race_times = {};
-    drivers.forEach(function(driver) {
-      race_times[driver.id] = getDriverRaceTime(lap_times, driver);
+    params.drivers.forEach(function(driver) {
+      race_times[driver.id] = getRaceTime(history, driver.id, params);
     });
     return race_times;
   }
-  var getDriverRaceTime = function(lap_times, driver) {
+  var getRaceTime = function(history, driver_id, params) {
     var race_time = 0;
-    Object.keys(lap_times).forEach(function(lap) {
-      race_time += lap_times[lap]["lap_amount"][driver.id];
+    history.forEach(function(lap_history) {
+      race_time += lap_history.lap[driver_id];
     });
     return race_time;
   }
 
-  //Fastest Laps
-  var getFastestLaps = function(lap_times, drivers) {
+  //Race->Fastest_Laps
+  var getFastestLaps = function(history, params) {
     var fastest_laps = {};
-    drivers.forEach(function(driver) {
-      fastest_laps[driver.id] = getDriverFastestLap(lap_times, driver);
+    params.drivers.forEach(function(driver) {
+      fastest_laps[driver.id] = getFastestLap(history, driver.id, params);
     });
     return fastest_laps;
   }
-  var getDriverFastestLap = function(lap_times, driver) {
+  var getFastestLap = function(history, driver_id, params) {
     var fastest_lap;
-    Object.keys(lap_times).forEach(function(lap) {
-      var lap_time = lap_times[lap]["lap_amount"][driver.id];
+    history.forEach(function(lap_history, lap) {
+      var lap_time = lap_history.lap[driver_id];
       fastest_lap = lap == 0 ? 
                     lap_time :
                     (lap_time < fastest_lap ? 
