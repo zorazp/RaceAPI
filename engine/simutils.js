@@ -62,8 +62,8 @@ var SimUtils = function() {
     if (!(query.driver_id instanceof Array))
       return [query.driver_id];
     else
-      return query.driver_id.filter(function(id, index, self) {
-          return index == self.indexOf(id);
+      return query.driver_id.filter(function(id, i, self) {
+          return i == self.indexOf(id);
       })
   };
   var getDriversAvgs = function(query, drivers_number) {
@@ -134,14 +134,14 @@ var SimUtils = function() {
   var getDrivers = function(drivers_ids, drivers_avgs, drivers_countries, 
     				        teams_avgs, teams_countries, engines_avgs) {
     var drivers = [];
-    drivers_ids.forEach(function(id, index) {
+    drivers_ids.forEach(function(id, i) {
       var driver = {};
       driver.id = id;
-      driver.avg = drivers_avgs[index];
-      driver.country = drivers_countries[index];
-      driver.team_avg = teams_avgs[index];
-      driver.team_country = teams_countries[index];
-      driver.engine_avg = engines_avgs[index];
+      driver.avg = drivers_avgs[i];
+      driver.country = drivers_countries[i];
+      driver.team_avg = teams_avgs[i];
+      driver.team_country = teams_countries[i];
+      driver.engine_avg = engines_avgs[i];
       drivers.push(driver);
     });
     return drivers;
@@ -187,10 +187,10 @@ var SimUtils = function() {
   };
   var getSectors = function (sectors_length, sectors_type) {
     var sectors = [];
-    sectors_length.forEach(function(sector_length, index) {
+    sectors_length.forEach(function(sector_length, i) {
       var sector = {};
       sector.length = sector_length;
-      sector.type = sectors_type[index];
+      sector.type = sectors_type[i];
       sectors.push(sector);
     });
     return sectors;
