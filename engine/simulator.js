@@ -17,7 +17,7 @@ var Simulator = function() {
     var results = {};
     results.lap_times = {};
     for (var i=0; i<params.track.laps; i++) {
-      results.lap_times[i] = getLapTimes(params.drivers, params.track);
+      results.lap_times[i] = getLapTimes(i, params.drivers, params.track);
     }
     results.race_times = getRaceTimes(results.lap_times, params.drivers);
     results.fastest_laps = getFastestLaps(results.lap_times, params.drivers);
@@ -25,30 +25,39 @@ var Simulator = function() {
   };
 
   //Laps And Sector Times
-  var getLapTimes = function(drivers, track) {
+  var getLapTimes = function(lap, drivers, track) {
     var lap_results = {};
     lap_results.sectors = {};
-    track.sectors.forEach(function(sector, i) {
-      lap_results.sectors[i+1] = getSectorResults(drivers, sector, track);
+    track.sectors.forEach(function(sector) {
+      lap_results.sectors[sector.number] = getSectorResults(
+        lap, drivers, sector, track
+      );
     });
     lap_results.lap_amount = getLapAmount(lap_results.sectors, drivers);
     return lap_results;
   };
-  var getSectorResults = function(drivers, sector, track) {
+  var getSectorResults = function(lap, drivers, sector, track) {
     var sector_times = {};
-    drivers.forEach(function(driver) {
-      sector_times[driver.id] = getSectorTime(driver, sector, track);
+    drivers.forEach(function(driver, grid) {
+      sector_times[driver.id] = getSectorTime(lap, grid, driver, sector, track);
     });
     return sector_times;
   };
-  var getSectorTime = function(driver, sector, track) {
+  var getSectorTime = function(lap, grid, driver, sector, track) {
     var raw_time = sector.length/(track.average_speed*1000/3600);
+    //Grid Start Penalization Time
+    raw_time = lap == 0 && sector.number == 1 ? 
+               raw_time + getGridTime(grid) :
+               raw_time;
     var sector_type_coef = getSectorTypeCoef(sector);
     var driver_avg_coef = getDriverAvgCoef(driver, track);
     var team_avg_coef = getTeamAvgCoef(driver, track);
     var engine_avg_coef = getEngineAvgCoef(driver);
     return raw_time*sector_type_coef*driver_avg_coef*
       team_avg_coef*engine_avg_coef;
+  }
+  var getGridTime = function(grid) {
+    return ((grid+1)*SimUtils.GRID_DIFFERENCE)+SimUtils.GRID_START_TIME;
   }
   var getSectorTypeCoef = function(sector) {
     if (sector.type == SimUtils.VERY_SLOW)

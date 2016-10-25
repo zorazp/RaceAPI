@@ -17,6 +17,10 @@ var SimUtils = function() {
   this.FAST_RANGE = [84, 88];
   this.VERY_FAST_RANGE = [60, 64];
 
+  //Start Grid Diference
+  this.GRID_DIFFERENCE = 0.3;
+  this.GRID_START_TIME = 2;
+
   //Private Values
 
   //Default Values
@@ -118,10 +122,10 @@ var SimUtils = function() {
   };
   var getEnginesAvgs = function(query, drivers_number) {
     var engines_avgs = [];
-    for (var i=0; i<drivers_number; i++) {
+    for (var index=0; index<drivers_number; index++) {
       var engine_avg = (!(query.engine_avg instanceof Array)) ?
                        query.engine_avg :
-                       query.engine_avg[i];
+                       query.engine_avg[index];
       engine_avg = parseInt(engine_avg);
       engines_avgs.push(
         !isNaN(engine_avg) && engine_avg >= MIN_AVG && engine_avg <= MAX_AVG ?
@@ -134,14 +138,14 @@ var SimUtils = function() {
   var getDrivers = function(drivers_ids, drivers_avgs, drivers_countries, 
     				        teams_avgs, teams_countries, engines_avgs) {
     var drivers = [];
-    drivers_ids.forEach(function(id, i) {
+    drivers_ids.forEach(function(id, index) {
       var driver = {};
       driver.id = id;
-      driver.avg = drivers_avgs[i];
-      driver.country = drivers_countries[i];
-      driver.team_avg = teams_avgs[i];
-      driver.team_country = teams_countries[i];
-      driver.engine_avg = engines_avgs[i];
+      driver.avg = drivers_avgs[index];
+      driver.country = drivers_countries[index];
+      driver.team_avg = teams_avgs[index];
+      driver.team_country = teams_countries[index];
+      driver.engine_avg = engines_avgs[index];
       drivers.push(driver);
     });
     return drivers;
@@ -187,10 +191,11 @@ var SimUtils = function() {
   };
   var getSectors = function (sectors_length, sectors_type) {
     var sectors = [];
-    sectors_length.forEach(function(sector_length, i) {
+    sectors_length.forEach(function(sector_length, index) {
       var sector = {};
+      sector.number = index+1;
       sector.length = sector_length;
-      sector.type = sectors_type[i];
+      sector.type = sectors_type[index];
       sectors.push(sector);
     });
     return sectors;
